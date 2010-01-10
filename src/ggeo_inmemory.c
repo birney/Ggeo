@@ -17,8 +17,12 @@ typedef struct GgeoInmemory_simple_store {
   int maxlen;
 } GgeoInmemory_simple_store;
 
+#define GGEO_INMEMORY_DENSITY_ONE 1000
+#define GGEO_INMEMORY_DENSITY_TWO 10000
+
 typedef struct GgeoInmemory_slice {
-  Ggeo_Feature_LinkedList * head;
+  Ggeo_Feature_LinkedList * head; /* absolute raw data */
+  Ggeo_Feature_LinkedList * density_heads[5];
 } GgeoInmemory_slice;
   
 
@@ -134,10 +138,6 @@ void store_Ggeo_Feature_GgeoInmemory_simple_store(GgeoInmemory_simple_store * gm
   gmem->len++;
 }
 
-void no_frills_no_refcount_Ggeo_Feature_free(Ggeo_Feature * f)
-{
-  return;
-}
 
 Ggeo_Feature * no_frills_no_refcount_Ggeo_Feature(const Ggeo_TopLevel * tl,long int start,long int end) 
 {
@@ -151,7 +151,6 @@ Ggeo_Feature * no_frills_no_refcount_Ggeo_Feature(const Ggeo_TopLevel * tl,long 
 
   out->start = start;
   out->end = end;
-  out->free_data = &(no_frills_no_refcount_Ggeo_Feature_free);
   out->data = NULL;
 
   return (out);
@@ -268,7 +267,7 @@ void free_GgeoInmemory_slice(Ggeo_Slice * genericsl)
   free(genericsl);
 }
 
-Ggeo_Feature_LinkedList * get_leftmost_Ggeo_Feature_inmemory(void * data)
+Ggeo_Feature_LinkedList * get_leftmost_Ggeo_Feature_inmemory(void * data,int resolution)
 {
   GgeoInmemory_slice * sl;
 
@@ -307,7 +306,6 @@ GgeoInmemory_simple_store * new_GgeoInmemory_simple_store_from_bed(FILE * ifp)
   GgeoInmemory_simple_store * out;
   Ggeo_Feature * f;
   Ggeo_TopLevel * tl = NULL;
-  int i;
   char buffer[1024];
 
   char chr[1024];
