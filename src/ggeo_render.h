@@ -4,7 +4,7 @@
 
 #include "ggeo_feature.h"
 
-#define GGEO_RENDER_PARAMETER 16
+#define GGEO_MAX_PARAMETER 24
 
 
 typedef struct ggeo_render_object {
@@ -23,29 +23,31 @@ typedef struct ggeo_render_user_parameter {
 } Ggeo_Render_User_Parameter;
 
 
+
 typedef struct ggeo_user_parameter_set {
-  int pixel_tile_width; /* deliberately int to ensure snap-ability etc */
-  double rgbcolor[3];
-  double alpha;
-  Ggeo_Render_Parameter para[GGEO_MAX_PARAMETER];
+  Ggeo_Render_User_Parameter para[GGEO_MAX_PARAMETER];
   int len;
+  double red;
+  double green;
+  double blue;
+  double alpha_t;
+  int tile_pixel_width;
 } Ggeo_Render_User_Parameter_Set;
 
 
 typedef struct ggeo_track_renderer {
   void * data;
-  void (*free_data)(struct ggeo_track_render *);
-  Ggeo_Render_Object * (*render_track)(Ggeo_Feature_LinkedList *,long int start,long int end);
+  void (*free_data)(struct ggeo_track_renderer *);
+  Ggeo_Render_Object * (*render_track)(void * data,Ggeo_Feature_LinkedList *,long int start,long int end);
 } Ggeo_Track_Renderer;
 
 
 typedef struct ggeo_track_renderer_factory {
   void * data;
-  void (*free_data)(struct ggeo_track_render *);
-  Ggeo_Render_User_Parameter_Set * (*get_default_parameters)(char * response_type);
-  Ggeo_Track_Renderer * (*make_renderer)(char * response_type,Ggeo_Render_User_Parameter_Set * ps);
+  void (*free_data)(struct ggeo_track_renderer_factory *);
+  Ggeo_Render_User_Parameter_Set * (*get_default_parameters)(void * data,char * response_type);
+  Ggeo_Track_Renderer * (*make_renderer)(void * data,Ggeo_Render_User_Parameter_Set * gp,char * response_type);
 } Ggeo_Track_Renderer_Factory;
-
 
 #endif
 
